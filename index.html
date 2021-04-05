@@ -12,9 +12,10 @@
       integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
       crossorigin="anonymous"
     />
-
+ 
     <title>Hello, world!</title>
   </head>
+
   <body>
     <!-- bootstrap- dropdown-toggle -->
     <div class="btn-group">
@@ -29,17 +30,19 @@
       <ul class="dropdown-menu" id="test"></ul>
     </div>
 
+    <!-- switch -->
     <div class="form-check form-switch">
-      <input
-        class="form-check-input success-switch"
-        type="checkbox"
-        id="flexSwitchCheckDefault"
-      />
+      <input class="form-check-input success-launch-switch" type="checkbox" />
       <label class="form-check-label" for="flexSwitchCheckDefault"
         >Successfull Launch</label
       >
     </div>
-
+    <div class="form-check form-switch">
+      <input class="form-check-input success-land-switch" type="checkbox" />
+      <label class="form-check-label" for="flexSwitchCheckDefault"
+        >Successfull Land</label
+      >
+    </div>
     <div class="container"></div>
 
     <!-- Bootstrap Bundle with Popper -->
@@ -54,41 +57,65 @@
       var globalArray;
       var users;
       let flag = 0;
-      // get clicked option value
-      //         function getEventTarget(e) {
-      //     e = e || window.event;
-      //     return e.target || e.srcElement;
-      // }
-
-      // var ul = document.getElementById('test');
-      // ul.onclick = function(event) {
-      //     var target = getEventTarget(event);
-      //     alert(target.innerHTML);
-      // };
-      // radio check logic
-      let successSwitch = document.querySelector(".success-switch");
-
-      successSwitch.addEventListener("change", () => {
-        renderUsers();
-      });
-
-      async function getUsers() {
-        let url = "https://api.spacexdata.com/v3/launches?limit=100";
+      var year = "";
+      var landSuccess = "";
+      var launchSuccess = "";
+  async function globalURL() {
         try {
-          let res = await fetch(url);
+          let res = await fetch('https://api.spaceXdata.com/v3/launches?limit=100');
           globalArray = await res.json();
         } catch (error) {
           console.log(error);
         }
+      }
+      globalURL();
+      var url = `https://api.spacexdata.com/v3/launches?limit=100&launch_success=${launchSuccess}&land_success=${landSuccess}&launch_year=${year}`;
 
-        if (successSwitch.checked == true) {
-          url =
-            "https://api.spacexdata.com/v3/launches?limit=100&launch_success=true";
-        }
-        if (flag == 1) {
-          url = `https://api.spaceXdata.com/v3/launches?limit=100&launch_year=${year}`;
+      // radio check logic
+      let successLaunchSwitch = document.querySelector(
+        ".success-launch-switch"
+      );
+      let successLandSwitch = document.querySelector(".success-land-switch");
+      function updateURL() {
+        url = `https://api.spacexdata.com/v3/launches?limit=100&launch_success=${launchSuccess}&land_success=${landSuccess}&launch_year=${year}`;
+        console.log(url);
+      }
+ 
+      successLandSwitch.addEventListener("change", () => {
+        if (successLandSwitch.checked == true) {
+          landSuccess = "true";
+          updateURL();
+        
+        } else {
+          landSuccess = "";
+          updateURL();
+         
         }
 
+        renderUsers();
+      });
+
+      successLaunchSwitch.addEventListener("change", () => {
+        if (successLaunchSwitch.checked == true) {
+          launchSuccess = "true";
+          updateURL();
+        } else {
+          launchSuccess = "";
+          updateURL();
+        }
+
+        renderUsers();
+      });
+
+      function selectThis(event) {
+        year = event.target.innerHTML;
+if(year=='All') {
+    year='';
+}
+        updateURL();
+        renderUsers();
+      }
+      async function getUsers() {
         try {
           let res = await fetch(url);
           return await res.json();
@@ -96,23 +123,12 @@
           console.log(error);
         }
       }
-      function selectThis(event) {
-        console.log(event.target.innerHTML);
-        flag = 1;
-        year = event.target.innerHTML;
-        users = users.filter(function (user) {
-          return user.launch_year == event.target.innerHTML;
-        });
-        renderUsers();
-      }
-
       async function renderUsers() {
         users = await getUsers();
 
-        // console.log(users);
         let html = "";
         users.forEach((user) => {
-          let htmlSegment = `<div class="user" style="margin:50px 20px">
+          let htmlSegment = `<div class="user" style="margin:50px 20px;border:2px solid black">
             <ul>
                              <p>Flight Number:${user.flight_number}</p> 
                          <li>    <p>Mission Name:${user.mission_name}</p></li>
@@ -124,18 +140,16 @@
         });
 
         let yearChoice = "";
-        // var uniqueArray = [...new Set(globalArray)];
-        globalArray = [...globalArray];
-        var uniqueArray = [
-          ...new Set(globalArray.map((event) => event.launch_year)),
-        ];
-        console.log(uniqueArray);
+        
+       
+        var uniqueArray = [...new Set(globalArray.map((event) => event.launch_year))];
+        // console.log(uniqueArray);
         uniqueArray.forEach((ele) => {
           yearChoice += `<li onclick="selectThis(event)"><a class="dropdown-item" href="#">${ele}</a></li>`;
         });
 
         let optionList = document.querySelector(".dropdown-menu");
-        optionList.innerHTML = yearChoice;
+        optionList.innerHTML = `<li onclick="selectThis(event)"><a class="dropdown-item" href="#">All</a></li>`+ yearChoice;
         let container = document.querySelector(".container");
         container.innerHTML = html;
       }
