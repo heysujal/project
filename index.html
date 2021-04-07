@@ -225,15 +225,19 @@
       setTimeout(() => {
         uniqueArray = [...new Set(yearList.map((event) => event))];
 
+
         uniqueArray.forEach((ele) => {
           yearChoice += `<li onclick="selectThis(event)"><a class="dropdown-item" href="#">${ele}</a></li>`;
         });
-
-        let optionList = document.querySelector(".dropdown-menu");
+console.log(yearChoice);
+}, 2000);
+setTimeout(()=>{
+let optionList = document.querySelector(".dropdown-menu");
         optionList.innerHTML =
           `<li onclick="selectThis(event)"><a class="dropdown-item" href="#">All</a></li>` +
           yearChoice;
-      }, 2000);
+},3000)
+        
 
       renderUsers();
     </script>
